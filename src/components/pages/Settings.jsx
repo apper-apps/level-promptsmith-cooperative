@@ -1,14 +1,16 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import Button from "@/components/atoms/Button";
+import App from "@/App";
+import ApperIcon from "@/components/ApperIcon";
 import Card from "@/components/atoms/Card";
 import Input from "@/components/atoms/Input";
-import ApperIcon from "@/components/ApperIcon";
+import Button from "@/components/atoms/Button";
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState("account");
   const [settings, setSettings] = useState({
     email: "user@example.com",
+    displayName: "John Doe",
     notifications: {
       emailUpdates: true,
       promptReminders: false,
@@ -103,9 +105,10 @@ const Settings = () => {
                     onChange={(e) => handleSettingChange("", "email", e.target.value)}
                     type="email"
                   />
-                  <Input
+<Input
                     label="Display Name"
-                    value="John Doe"
+                    value={settings.displayName}
+                    onChange={(e) => handleSettingChange("", "displayName", e.target.value)}
                     placeholder="Enter your display name"
                   />
                   <div className="flex gap-4">
