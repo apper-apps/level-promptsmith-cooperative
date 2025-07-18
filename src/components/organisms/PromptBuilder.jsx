@@ -186,9 +186,9 @@ const PromptBuilder = ({ initialPrompt, onSave, onCancel }) => {
                 placeholder="Add tags to organize your prompts..."
               />
             </div>
-          </div>
+</div>
         );
-case 2:
+      case 2:
         return (
           <div className="space-y-4">
             <Textarea
@@ -206,20 +206,20 @@ case 2:
                 size="sm"
 onClick={() => insertPlaceholder("toneRole", "expertise")}
               >
-                + {{"expertise"}}
+                + {"{{expertise}}"}
               </Button>
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => insertPlaceholder("toneRole", "experience")}
+onClick={() => insertPlaceholder("toneRole", "experience")}
               >
-                + {{"experience"}}
+                + {"{{experience}}"}
               </Button>
             </div>
-          </div>
+</div>
         );
-case 3:
+      case 3:
         return (
           <div className="space-y-4">
             <Textarea
@@ -237,20 +237,20 @@ case 3:
                 size="sm"
 onClick={() => insertPlaceholder("goal", "content_type")}
               >
-                + {{"content_type"}}
+                + {"{{content_type}}"}
               </Button>
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => insertPlaceholder("goal", "target_outcome")}
+onClick={() => insertPlaceholder("goal", "target_outcome")}
               >
-                + {{"target_outcome"}}
+                + {"{{target_outcome}}"}
               </Button>
             </div>
-          </div>
+</div>
         );
-case 4:
+      case 4:
         return (
           <div className="space-y-4">
             <Textarea
@@ -268,20 +268,20 @@ case 4:
                 size="sm"
 onClick={() => insertPlaceholder("context", "audience")}
               >
-                + {{"audience"}}
+                + {"{{audience}}"}
               </Button>
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => insertPlaceholder("context", "primary_goal")}
+onClick={() => insertPlaceholder("context", "primary_goal")}
               >
-                + {{"primary_goal"}}
+                + {"{{primary_goal}}"}
               </Button>
             </div>
-          </div>
+</div>
         );
-case 5:
+      case 5:
         return (
           <div className="space-y-4">
             <Textarea
@@ -299,20 +299,20 @@ case 5:
                 size="sm"
 onClick={() => insertPlaceholder("instruction", "section_count")}
               >
-                + {{"section_count"}}
+                + {"{{section_count}}"}
               </Button>
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => insertPlaceholder("instruction", "required_elements")}
+onClick={() => insertPlaceholder("instruction", "required_elements")}
               >
-                + {{"required_elements"}}
+                + {"{{required_elements}}"}
               </Button>
             </div>
-          </div>
+</div>
         );
-case 6:
+      case 6:
         return (
           <div className="space-y-6">
             <div className="space-y-4">
@@ -331,15 +331,15 @@ case 6:
                   size="sm"
 onClick={() => insertPlaceholder("format", "format_type")}
                 >
-                  + {{"format_type"}}
+                  + {"{{format_type}}"}
                 </Button>
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => insertPlaceholder("format", "structure_details")}
+onClick={() => insertPlaceholder("format", "structure_details")}
                 >
-                  + {{"structure_details"}}
+                  + {"{{structure_details}}"}
                 </Button>
               </div>
             </div>
@@ -359,15 +359,15 @@ onClick={() => insertPlaceholder("format", "format_type")}
                   size="sm"
 onClick={() => insertPlaceholder("examples", "example_number")}
                 >
-                  + {{"example_number"}}
+                  + {"{{example_number}}"}
                 </Button>
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => insertPlaceholder("examples", "word_count")}
+onClick={() => insertPlaceholder("examples", "word_count")}
                 >
-                  + {{"word_count"}}
+                  + {"{{word_count}}"}
                 </Button>
               </div>
             </div>
@@ -462,9 +462,9 @@ onClick={() => insertPlaceholder("examples", "example_number")}
               </Button>
             </div>
           </div>
-        </Card>
+</Card>
 
-{/* Preview Section */}
+        {/* Preview Section */}
         <Card className="p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold text-gray-900">
@@ -559,11 +559,11 @@ onClick={() => insertPlaceholder("examples", "example_number")}
                       </div>
                     ))}
                   </div>
-                ) : (
+) : (
                   <div className="flex flex-col items-center justify-center h-full text-gray-500">
 <ApperIcon name="Variable" size={48} className="mb-4 text-gray-400" />
                     <p className="text-center">
-                      No variables detected. Add {{"variable_name"}} placeholders to your prompt fields.
+                      No variables detected. Add {"{{variable_name}}"} placeholders to your prompt fields.
                     </p>
                   </div>
                 )}
