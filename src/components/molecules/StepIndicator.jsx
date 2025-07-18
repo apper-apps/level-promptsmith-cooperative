@@ -10,12 +10,13 @@ const StepIndicator = ({
 }) => {
   return (
     <div className={cn("flex items-center justify-between", className)}>
-      {steps.map((step, index) => {
+{steps.map((step, index) => {
         const stepNumber = index + 1;
         const isComplete = completedSteps.includes(stepNumber);
         const isCurrent = currentStep === stepNumber;
         const isUpcoming = stepNumber > currentStep;
-return (
+        
+        return (
           <div key={step.id} className="flex items-center">
             <div className="flex flex-col items-center">
               <div className={cn(
@@ -44,7 +45,7 @@ return (
               )}
             >
               {step.title}
-            </span>
+</span>
           </div>
           {index < steps.length - 1 && (
             <div
@@ -60,7 +61,9 @@ return (
           )}
         </div>
       );
-      })}
+    })}
+    </div>
+  );
 };
 
 export default StepIndicator;
