@@ -1,13 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import ApperIcon from "@/components/ApperIcon";
+import Builder from "@/components/pages/Builder";
 import StepIndicator from "@/components/molecules/StepIndicator";
-import Input from "@/components/atoms/Input";
-import Textarea from "@/components/atoms/Textarea";
-import Button from "@/components/atoms/Button";
-import Card from "@/components/atoms/Card";
 import TagInput from "@/components/molecules/TagInput";
 import CopyButton from "@/components/molecules/CopyButton";
-import ApperIcon from "@/components/ApperIcon";
+import Card from "@/components/atoms/Card";
+import Textarea from "@/components/atoms/Textarea";
+import Input from "@/components/atoms/Input";
+import Button from "@/components/atoms/Button";
 
 const PromptBuilder = ({ initialPrompt, onSave, onCancel }) => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -22,7 +23,8 @@ const PromptBuilder = ({ initialPrompt, onSave, onCancel }) => {
     examples: "",
   });
   const [assembledPrompt, setAssembledPrompt] = useState("");
-
+  const [variables, setVariables] = useState({});
+  const [activeTab, setActiveTab] = useState("preview");
   const steps = [
     { id: 1, title: "Title & Tags", field: "title" },
     { id: 2, title: "Tone / Role", field: "toneRole" },
@@ -58,6 +60,46 @@ const PromptBuilder = ({ initialPrompt, onSave, onCancel }) => {
       ...prev,
       [field]: value
     }));
+};
+
+  const detectVariables = (text) => {
+    const regex = /\{\{([^}]+)\}\}/g;
+    const matches = [...text.matchAll(regex)];
+    return matches.map(match => match[1].trim());
+  };
+
+  const getAllVariables = () => {
+    const allText = Object.values(formData).filter(value => 
+      typeof value === 'string'
+    ).join(' ');
+    const detectedVars = detectVariables(allText);
+    return [...new Set(detectedVars)];
+  };
+
+  const insertPlaceholder = (field, placeholder) => {
+    const textarea = document.querySelector(`[data-field="${field}"]`);
+    if (textarea) {
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const currentValue = formData[field];
+      const newValue = currentValue.slice(0, start) + `{{${placeholder}}}` + currentValue.slice(end);
+      handleInputChange(field, newValue);
+      
+      // Focus and set cursor position after the inserted placeholder
+      setTimeout(() => {
+        textarea.focus();
+        textarea.setSelectionRange(start + placeholder.length + 4, start + placeholder.length + 4);
+      }, 0);
+    }
+  };
+
+  const processVariables = (text) => {
+    let processed = text;
+    Object.entries(variables).forEach(([key, value]) => {
+      const regex = new RegExp(`\\{\\{${key}\\}\\}`, 'g');
+      processed = processed.replace(regex, value || `{{${key}}}`);
+    });
+    return processed;
   };
 
   const assemblePrompt = () => {
@@ -87,7 +129,18 @@ const PromptBuilder = ({ initialPrompt, onSave, onCancel }) => {
       prompt += `Examples: ${formData.examples}`;
     }
 
-    setAssembledPrompt(prompt.trim());
+    const rawPrompt = prompt.trim();
+    const processedPrompt = processVariables(rawPrompt);
+    
+    setAssembledPrompt(rawPrompt);
+    return { raw: rawPrompt, processed: processedPrompt };
+  };
+
+  const handleVariableChange = (varName, value) => {
+    setVariables(prev => ({
+      ...prev,
+      [varName]: value
+    }));
   };
 
   const handleNext = () => {
@@ -135,63 +188,189 @@ const PromptBuilder = ({ initialPrompt, onSave, onCancel }) => {
             </div>
           </div>
         );
-      case 2:
+case 2:
         return (
-          <Textarea
-            label="Tone / Role"
-            value={formData.toneRole}
-            onChange={(e) => handleInputChange("toneRole", e.target.value)}
-            placeholder="e.g., Act as a professional content strategist with 10 years of experience..."
-            rows={4}
-          />
+          <div className="space-y-4">
+            <Textarea
+              label="Tone / Role"
+              value={formData.toneRole}
+              onChange={(e) => handleInputChange("toneRole", e.target.value)}
+              placeholder="e.g., Act as a professional {{expertise}} with {{experience}} years of experience..."
+              rows={4}
+              data-field="toneRole"
+            />
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+onClick={() => insertPlaceholder("toneRole", "expertise")}
+              >
+                + {{"expertise"}}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => insertPlaceholder("toneRole", "experience")}
+              >
+                + {{"experience"}}
+              </Button>
+            </div>
+          </div>
         );
-      case 3:
+case 3:
         return (
-          <Textarea
-            label="Goal / Objective"
-            value={formData.goal}
-            onChange={(e) => handleInputChange("goal", e.target.value)}
-            placeholder="e.g., Help create a comprehensive blog post outline that drives organic traffic..."
-            rows={4}
-          />
+          <div className="space-y-4">
+            <Textarea
+              label="Goal / Objective"
+              value={formData.goal}
+              onChange={(e) => handleInputChange("goal", e.target.value)}
+              placeholder="e.g., Help create a comprehensive {{content_type}} that drives {{target_outcome}}..."
+              rows={4}
+              data-field="goal"
+            />
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+onClick={() => insertPlaceholder("goal", "content_type")}
+              >
+                + {{"content_type"}}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => insertPlaceholder("goal", "target_outcome")}
+              >
+                + {{"target_outcome"}}
+              </Button>
+            </div>
+          </div>
         );
-      case 4:
+case 4:
         return (
-          <Textarea
-            label="Background / Context"
-            value={formData.context}
-            onChange={(e) => handleInputChange("context", e.target.value)}
-            placeholder="e.g., The target audience is small business owners who want to improve their online presence..."
-            rows={4}
-          />
+          <div className="space-y-4">
+            <Textarea
+              label="Background / Context"
+              value={formData.context}
+              onChange={(e) => handleInputChange("context", e.target.value)}
+              placeholder="e.g., The target audience is {{audience}} who want to {{primary_goal}}..."
+              rows={4}
+              data-field="context"
+            />
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+onClick={() => insertPlaceholder("context", "audience")}
+              >
+                + {{"audience"}}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => insertPlaceholder("context", "primary_goal")}
+              >
+                + {{"primary_goal"}}
+              </Button>
+            </div>
+          </div>
         );
-      case 5:
+case 5:
         return (
-          <Textarea
-            label="Instructions / Action"
-            value={formData.instruction}
-            onChange={(e) => handleInputChange("instruction", e.target.value)}
-            placeholder="e.g., Create a detailed outline with 5-7 main sections, including introduction, key points, and conclusion..."
-            rows={4}
-          />
+          <div className="space-y-4">
+            <Textarea
+              label="Instructions / Action"
+              value={formData.instruction}
+              onChange={(e) => handleInputChange("instruction", e.target.value)}
+              placeholder="e.g., Create a detailed outline with {{section_count}} main sections, including {{required_elements}}..."
+              rows={4}
+              data-field="instruction"
+            />
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+onClick={() => insertPlaceholder("instruction", "section_count")}
+              >
+                + {{"section_count"}}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => insertPlaceholder("instruction", "required_elements")}
+              >
+                + {{"required_elements"}}
+              </Button>
+            </div>
+          </div>
         );
-      case 6:
+case 6:
         return (
           <div className="space-y-6">
-            <Textarea
-              label="Output Format"
-              value={formData.format}
-              onChange={(e) => handleInputChange("format", e.target.value)}
-              placeholder="e.g., Numbered list with bullet points for sub-topics, include estimated word counts..."
-              rows={3}
-            />
-            <Textarea
-              label="Examples (Optional)"
-              value={formData.examples}
-              onChange={(e) => handleInputChange("examples", e.target.value)}
-              placeholder="e.g., 1. Introduction (300 words) - Hook, problem statement, solution preview..."
-              rows={4}
-            />
+            <div className="space-y-4">
+              <Textarea
+                label="Output Format"
+                value={formData.format}
+                onChange={(e) => handleInputChange("format", e.target.value)}
+                placeholder="e.g., {{format_type}} with {{structure_details}}, include {{additional_requirements}}..."
+                rows={3}
+                data-field="format"
+              />
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+onClick={() => insertPlaceholder("format", "format_type")}
+                >
+                  + {{"format_type"}}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => insertPlaceholder("format", "structure_details")}
+                >
+                  + {{"structure_details"}}
+                </Button>
+              </div>
+            </div>
+            <div className="space-y-4">
+              <Textarea
+                label="Examples (Optional)"
+                value={formData.examples}
+                onChange={(e) => handleInputChange("examples", e.target.value)}
+                placeholder="e.g., {{example_number}}. {{section_name}} ({{word_count}} words) - {{description}}..."
+                rows={4}
+                data-field="examples"
+              />
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+onClick={() => insertPlaceholder("examples", "example_number")}
+                >
+                  + {{"example_number"}}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => insertPlaceholder("examples", "word_count")}
+                >
+                  + {{"word_count"}}
+                </Button>
+              </div>
+            </div>
           </div>
         );
       default:
@@ -285,33 +464,109 @@ const PromptBuilder = ({ initialPrompt, onSave, onCancel }) => {
           </div>
         </Card>
 
-        {/* Preview Section */}
+{/* Preview Section */}
         <Card className="p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold text-gray-900">
               Live Preview
             </h2>
-            {assembledPrompt && (
-              <CopyButton text={assembledPrompt} size="sm" />
-            )}
+            <div className="flex items-center gap-2">
+              {assembledPrompt && (
+                <CopyButton text={processVariables(assembledPrompt)} size="sm" />
+              )}
+            </div>
+          </div>
+
+          <div className="flex border-b border-gray-200 mb-4">
+            <button
+              onClick={() => setActiveTab("preview")}
+              className={`px-4 py-2 text-sm font-medium border-b-2 ${
+                activeTab === "preview"
+                  ? "border-primary-500 text-primary-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              Preview
+            </button>
+            <button
+              onClick={() => setActiveTab("variables")}
+              className={`px-4 py-2 text-sm font-medium border-b-2 ${
+                activeTab === "variables"
+                  ? "border-primary-500 text-primary-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              Variables ({getAllVariables().length})
+            </button>
           </div>
 
           <div className="bg-gray-50 rounded-lg p-4 min-h-[400px]">
-            {assembledPrompt ? (
-              <div className="preview-content">
-                <div className="text-sm text-gray-600 mb-4">
-                  Generated Prompt ({assembledPrompt.length} characters):
+            {activeTab === "preview" ? (
+              assembledPrompt ? (
+                <div className="preview-content">
+                  <div className="text-sm text-gray-600 mb-4">
+                    Generated Prompt ({assembledPrompt.length} characters):
+                  </div>
+                  <div className="text-gray-800 leading-relaxed">
+                    {assembledPrompt.split(/(\{\{[^}]+\}\})/g).map((part, index) => (
+                      <span
+                        key={index}
+                        className={part.match(/\{\{[^}]+\}\}/) ? "variable-highlight" : ""}
+                      >
+                        {part.match(/\{\{[^}]+\}\}/) ? part : part}
+                      </span>
+                    ))}
+                  </div>
+                  {Object.keys(variables).length > 0 && (
+                    <div className="mt-6 pt-4 border-t border-gray-200">
+                      <div className="text-sm text-gray-600 mb-2">With Variables Replaced:</div>
+                      <div className="text-gray-800 leading-relaxed bg-white p-3 rounded">
+                        {processVariables(assembledPrompt)}
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <div className="text-gray-800 leading-relaxed">
-                  {assembledPrompt}
+              ) : (
+                <div className="flex flex-col items-center justify-center h-full text-gray-500">
+                  <ApperIcon name="FileText" size={48} className="mb-4 text-gray-400" />
+                  <p className="text-center">
+                    Fill in the form fields and click "Generate Preview" to see your assembled prompt
+                  </p>
                 </div>
-              </div>
+              )
             ) : (
-              <div className="flex flex-col items-center justify-center h-full text-gray-500">
-                <ApperIcon name="FileText" size={48} className="mb-4 text-gray-400" />
-                <p className="text-center">
-                  Fill in the form fields and click "Generate Preview" to see your assembled prompt
-                </p>
+              <div className="space-y-4">
+                <div className="text-sm text-gray-600 mb-4">
+                  Manage placeholder variables in your prompt:
+                </div>
+                {getAllVariables().length > 0 ? (
+                  <div className="space-y-3">
+                    {getAllVariables().map((variable) => (
+                      <div key={variable} className="flex items-center gap-3 p-3 bg-white rounded-lg">
+                        <div className="flex-shrink-0">
+                          <span className="text-sm font-medium text-gray-700">
+                            {`{{${variable}}}`}
+                          </span>
+                        </div>
+                        <div className="flex-1">
+                          <Input
+                            placeholder={`Enter value for ${variable}`}
+                            value={variables[variable] || ""}
+                            onChange={(e) => handleVariableChange(variable, e.target.value)}
+                            size="sm"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full text-gray-500">
+<ApperIcon name="Variable" size={48} className="mb-4 text-gray-400" />
+                    <p className="text-center">
+                      No variables detected. Add {{"variable_name"}} placeholders to your prompt fields.
+                    </p>
+                  </div>
+                )}
               </div>
             )}
           </div>

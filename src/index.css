@@ -75,6 +75,15 @@
   font-weight: 500;
 }
 
+.preview-content .variable-highlight {
+  background: linear-gradient(135deg, #FF6B6B20 0%, #FFA72620 100%);
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-weight: 600;
+  color: #B34A4A;
+  border: 1px solid #FFD7D7;
+}
+
 /* Form Animations */
 .form-field {
   transition: all 0.2s ease-out;

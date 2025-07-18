@@ -77,7 +77,7 @@ const PromptCard = ({ prompt, onEdit, onDelete, onDuplicate }) => {
                 +{prompt.tags.length - 3} more
               </Badge>
             )}
-          </div>
+</div>
 
           <div className="text-sm text-gray-600 mb-4">
             <div className="flex items-center gap-2 mb-1">
@@ -92,6 +92,32 @@ const PromptCard = ({ prompt, onEdit, onDelete, onDuplicate }) => {
             </div>
           </div>
 
+          {/* Variables Detection */}
+          {(() => {
+            const allText = [prompt.toneRole, prompt.goal, prompt.context, prompt.instruction, prompt.format, prompt.examples]
+              .filter(Boolean)
+              .join(' ');
+            const variables = [...new Set([...allText.matchAll(/\{\{([^}]+)\}\}/g)].map(match => match[1].trim()))];
+            
+            return variables.length > 0 && (
+              <div className="text-xs text-gray-500 mb-3">
+                <div className="flex items-center gap-2">
+                  <ApperIcon name="Variable" size={12} />
+                  <span className="font-medium">Variables:</span>
+                  <div className="flex flex-wrap gap-1">
+                    {variables.slice(0, 2).map((variable, index) => (
+                      <span key={index} className="bg-primary-50 text-primary-600 px-2 py-0.5 rounded text-xs">
+                        {`{{${variable}}}`}
+                      </span>
+                    ))}
+                    {variables.length > 2 && (
+                      <span className="text-gray-400">+{variables.length - 2} more</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
           <div className="text-xs text-gray-500 mb-4">
             Last modified: {format(new Date(prompt.updatedAt), "MMM d, yyyy")}
           </div>
